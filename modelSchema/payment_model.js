@@ -5,6 +5,10 @@ const paymentDetail = new Schema({
         type:String,
         required:true
     },
+    link_amount_paid:{
+        type:Number,
+        default:0,
+    },
     cf_link_id:{
         type:Number,
         required:true

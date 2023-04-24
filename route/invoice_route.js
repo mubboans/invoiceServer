@@ -1,5 +1,5 @@
 const express = require('express');
-const { getInvoice, addInvoice, deleteInvoice, updateInvoice, getInvoiceByNo, getinvoicePdfbyNo, deleteSelected, readablePDF, getPaymentStatus } = require('../controller/invoice_controller');
+const { getInvoice, addInvoice, deleteInvoice, updateInvoice, getInvoiceByNo, getinvoicePdfbyNo, deleteSelected, readablePDF, getPaymentStatus, updateStatusinPayementDetail } = require('../controller/invoice_controller');
 
 const route = express.Router();
 route.post('/invoice',addInvoice);
@@ -11,5 +11,5 @@ route.get('/invoice/pdf:no',getinvoicePdfbyNo);
 route.post('/invoice/delete',deleteSelected);
 route.get('/invoice/:no/pdf',readablePDF);
 route.get('/invoice/payment/status:id',getPaymentStatus)
-
+route.patch('/invoice/payment/update::id',updateStatusinPayementDetail)
 module.exports = route

@@ -109,26 +109,7 @@ const addInvoice =asyncWrapper(async (req,res,next)=>{
         .catch(err => {console.log('error',err)
         res.status(400).send({message:"Can't Generate Link",error:err.message})  
     });
-    setTimeout(()=>{
-        console.log(invoicemodel,'invoice data');
-       
-    },1000)
-   
-    // pg.orders.createOrders({
-    //     orderId: randomnum,// unique order ID
-    //     orderCurrency: 'INR', 
-    //     amount: invoicemodel.totalamount, // amount in INR
-    //     customerName: customer.name, // customer name
-    //     customerPhone: customer.contact, // customer phone number
-    //     customerEmail: customer.email, // customer email ID // optional webhook URL
-    //   })
-    //   .then((response) => {
-    //     paymentlink = response;
-    //   })
-    //   .catch((error) => {
-    //     console.error(error);
-    //   });
-   
+ 
 }
     )  
 const getPaymentStatus =async(req,res,next)=>{
@@ -147,7 +128,34 @@ console.log(configdata);
 sdk.getPaymentLinkDetails(configdata)
   .then(({ data }) => res.status(200).send({message :'Successfully Fetch Status',success:true,data:data}))
   .catch(err =>res.status(400).send({message :'Failed to Fetch Status',success:false,error:err})); 
-} 
+}
+
+
+const updateStatusinPayementDetail = (req,res)=>{
+    console.log('called 135');
+        let id = req.params.id;
+        let data = req.body;
+        console.log(data,id);
+        const updatestatuspayment = {
+            link_status: data.link_status,
+            link_amount_paid:data.link_amount_paid
+        }
+        payDetail.findOneAndUpdate({ _id: id }, updatestatuspayment, (err, obj) => {
+            if (err) {
+                console.log(err,'err');
+             return res.status(400).send({ message: "Can't Update Status in payment", success: false, error: err });
+            }
+            else {
+                console.log(obj,'update');
+                  res.status(200).send({ message: "Successfull Update Status in Payment", success: true , status:'Success' });
+              
+            }
+        })
+    
+    
+    
+}
+
 const deleteSelected = async (req,res,next)=>{
     let ids = req.body.ids
     console.log(ids);
@@ -355,5 +363,5 @@ module.exports = {
     getinvoicePdfbyNo,
     deleteSelected,
     readablePDF,
-    getPaymentStatus
+    getPaymentStatus,updateStatusinPayementDetail
 }

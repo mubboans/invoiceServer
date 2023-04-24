@@ -51,6 +51,7 @@ const invoiceSchema = new Schema({
         type:String,
         required:true
     },
+
     paymentDetail:{
         type: Schema.Types.ObjectId, ref: "paymentDetail" 
     }
