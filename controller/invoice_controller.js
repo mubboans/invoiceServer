@@ -5,8 +5,10 @@ const ejs = require('ejs');
 const moment = require('moment');
 const puppeteer = require('puppeteer');
 const {CustomError} = require('../errors/custom-error');
-const payDetail = require('../modelSchema/payment_model')
+const payDetail = require('../modelSchema/payment_model');
+const partialWebHookDetail = require('../modelSchema/payment_history_model');
 const sdk = require('api')('@cashfreedocs-new/v3#he81m7ldwtny5h');
+
 // const { PaymentGateway } = require('@cashfreepayments/cashfree-sdk');
 
 const asyncWrapper = require('../middleware/asynwrapper');
@@ -130,6 +132,56 @@ sdk.getPaymentLinkDetails(configdata)
   .catch(err =>res.status(400).send({message :'Failed to Fetch Status',success:false,error:err})); 
 }
 
+const webHookpaymentdetail= async (req,res,next)=>{
+    let reqbody = req.body;
+    let order = reqbody.data.order;
+    let payment =reqbody.data.payment;
+    console.log(reqbody, 'data check',order, reqbody.data.payment);
+    // res.send({working:"hello"})
+    // mongo db query to find data with matching link id in express nodejs
+    if (reqbody && order.order_tags != null && payment.payment_status == 'SUCCESS')  {
+        payDetail.find({link_id:order.order_tags.link_id},(err,obj)=>{
+            if(err){
+                return res.status(400).send({message:"can't find payment detail",success:false,status:"Failed"})
+            }else{
+                // res.status(200).json(obj);
+                let payDetailhistory = new partialWebHookDetail();
+                payDetailhistory.amount=order.order_amount;
+                payDetailhistory.payementId=obj[0].id;
+                payDetailhistory.paymentData=obj[0].id;
+                partialWebHookDetail.create(payDetailhistory,(err,suc)=>{
+                    if(err){
+                    return res.status(400).send({message:"Can't Create payment detail",success:false,status:"Failed"})
+                    }
+                    else
+                    {
+                        console.log(suc);
+                        res.status(201).send({message:"Succesfully created payment history"});
+                    }
+                })
+            }
+        })
+      
+        // console.log(getPayDetail, 'get detail', getPayDetail.id);
+        // let isPartialCreated = await partialPaymentDetail.create({
+        //     payment_id: getPayDetail.id,
+        //     amount: order.order_amount,
+        //     payment_date: reqbody.data.payment.payment_time
+        // });
+        // res.status(200).json(reqbody);
+        // console.log('if work');
+    }
+    else if (reqbody && order.order_tags == null) {
+        console.log('else if work');
+        res.status(200).json(reqbody)
+       
+    }
+    else {
+        res.status(404).send({message:"Something went wrong",success:false,status:"Failed"})
+        console.log('else work');
+       
+    }
+}
 
 const updateStatusinPayementDetail = (req,res)=>{
     console.log('called 135');
@@ -363,5 +415,6 @@ module.exports = {
     getinvoicePdfbyNo,
     deleteSelected,
     readablePDF,
+    webHookpaymentdetail,
     getPaymentStatus,updateStatusinPayementDetail
 }
