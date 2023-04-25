@@ -131,7 +131,21 @@ sdk.getPaymentLinkDetails(configdata)
   .then(({ data }) => res.status(200).send({message :'Successfully Fetch Status',success:true,data:data}))
   .catch(err =>res.status(400).send({message :'Failed to Fetch Status',success:false,error:err})); 
 }
+const paymentDetailHistorybyId = (req,res,next)=>{
+    let id =req.params.id;
+    partialWebHookDetail.find({payementId:id}).populate([
+        {
+          path: 'paymentData',
+        } ]).exec((err,suc)=>{
+        if(err){
+            return res.status(404).send({message:"Can'nt find any data",success:false})
+        }
+        else{
 
+            return res.status(200).send({message:"Sucesfully find data",success:true,data:suc})
+        }
+    })
+}
 const webHookpaymentdetail= async (req,res,next)=>{
     let reqbody = req.body;
     let order = reqbody.data.order;
@@ -416,5 +430,6 @@ module.exports = {
     deleteSelected,
     readablePDF,
     webHookpaymentdetail,
+    paymentDetailHistorybyId,
     getPaymentStatus,updateStatusinPayementDetail
 }
